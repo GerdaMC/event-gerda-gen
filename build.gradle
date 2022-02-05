@@ -1,0 +1,71 @@
+plugins {
+    id "fun.fotontv.gradle.gerda.dev" version "1.0.0"
+    id "net.kyori.indra.publishing.gradle-plugin" version "2.1.1"
+    id "java-gradle-plugin"
+    id 'com.gradle.plugin-publish' version '0.13.0'
+}
+
+// Default tasks
+defaultTasks 'licenseFormat', 'build'
+
+// Basic project information
+group = "fun.fotontv"
+
+gerdaConvention {
+    repository("event-gerda-gen") {
+        ci = true
+        publishing = true
+    }
+    mitLicense()
+
+    licenseParameters {
+        name = rootProject.projectName
+        organization = rootProject.organization
+        url = rootProject.url
+    }
+
+    sharedManifest {
+        indraGit.applyVcsInformationToManifest(it)
+        attributes(
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": project.url
+        )
+    }
+}
+
+// Project repositories and dependencies
+repositories {
+    maven {
+        url = "https://repo.spongepowered.org/repository/maven-public/"
+        name = "sponge"
+    }
+}
+
+dependencies {
+    implementation 'fr.inria.gforge.spoon:spoon-core:10.0.0'
+    implementation 'org.ow2.asm:asm:9.2'
+    compileOnlyApi 'org.checkerframework:checker-qual:3.21.1'
+    compileOnlyApi 'com.google.errorprone:error_prone_annotations:2.11.0'
+
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.8.2')
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.8.2')
+}
+
+indraPluginPublishing {
+    plugin(
+            "event-gerda-gen",
+            "fun.fotontv.eventgerdagen.EventImplGenPlugin",
+            "Gerda Event Implementation Generator",
+            project.description,
+            ["minecraft", "gerda"]
+    )
+}
+
+pluginBundle {
+    website = "https://github.com/$project.organization/$project.name"
+    vcsUrl = website
+    description = project.description
+    tags = ['minecraft', 'gerda']
+}
+
